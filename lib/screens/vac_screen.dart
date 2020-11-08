@@ -25,7 +25,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
     String path = '/vaccine_list';
     var response = await http.get(kUrl + path);
     var data = jsonDecode(response.body);
-    print('Data: $data');
+    // print('Data: $data');
     List<Vaccine> vaccines = [];
     for (var vac in data['names']) {
       Vaccine vaccine = Vaccine(vacID: vac['id'], vacName: vac['name']);
