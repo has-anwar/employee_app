@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -154,10 +155,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    Dialogs.showLoadingDialog(context, _keyLoader);
-                    checkVicinity(context);
-
-                    // getOfficeCoordinates();
+                    // dialogs.showloadingdialog(context, _keyloader);
+                    // checkvicinity(context);
+                    log('maps pressed');
+                    Navigator.pushNamed(context, '/attendance');
+                    // getofficecoordinates();
                   },
                   child: HomeCard(
                     title: 'Mark Attendance',
