@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -90,11 +91,11 @@ class _QRScannerState extends State<QRScanner> {
                 barrierDismissible: false, // user must tap button!
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Alert'),
+                    title: Text('Incorrect QR Code Scanned'),
                     content: SingleChildScrollView(
                       child: ListBody(
                         children: <Widget>[
-                          Text('QR Code not scanned properly'),
+                          Text('Generate new QR Code from official app'),
                         ],
                       ),
                     ),

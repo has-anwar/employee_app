@@ -28,6 +28,8 @@ dev_dependencies:
   qr_code_scanner: ^0.0.13
   qr_flutter: ^3.1.0
   flutter_spinkit: "^4.1.2"
+  permission_handler: ^5.0.1+1
+#  units: ^0.0.7
 
 flutter:
 

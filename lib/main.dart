@@ -33,10 +33,12 @@ Future<void> main() async {
         '/profile_screen': (context) => ProfileScreen(),
         // '/attendance': (context) => AttendanceScreen(),
         '/attendance': (context) => MarkAttendance(),
+        // '/attendance': (context) => MapPage(),
+
         '/maps_menu': (context) => MapsMenuScreen(),
         '/vac_screen': (context) => VaccinationScreen(),
         '/change_password': (context) => UpdatePassword(),
-        '/office_map': (context) => OfficeMap(),
+        // '/office_map': (context) => OfficeMap(),
       },
     ),
   );

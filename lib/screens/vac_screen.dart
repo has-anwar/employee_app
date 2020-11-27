@@ -270,7 +270,8 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                                         style: TextStyle(color: kOrangeColor),
                                       ),
                                       onPressed: () async {
-                                        String path = '/vaccine_records';
+                                        String path =
+                                            '/vaccine_records/${args.childId}';
                                         final http.Response response =
                                             await http.post(
                                           kUrl + path,

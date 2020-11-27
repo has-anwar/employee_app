@@ -18,104 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var officeLat;
-  var officeLong;
-
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
-
-  getOfficeCoordinates() async {
-    int fid = await getOfficeID();
-    String path = '/office_location/$fid';
-    var response = await http.get(kUrl + path);
-    var json = jsonDecode(response.body);
-    OfficeLocation officeLocation = OfficeLocation(
-        address: json['address'],
-        latitude: json['lat'],
-        longitude: json['long']);
-
-    return officeLocation;
-  }
-
-  getCurrentLocation() async {
-    final position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    return position;
-  }
-
-  checkVicinity(BuildContext context) async {
-    var position = await getCurrentLocation();
-    OfficeLocation officeLocation = await getOfficeCoordinates();
-    officeLat = officeLocation.latitude;
-    officeLong = officeLocation.longitude;
-
-    bool flag = false;
-    if (position.latitude >= officeLat && position.latitude <= officeLat + 1) {
-      if (position.longitude >= officeLong &&
-          position.longitude <= officeLong + 1) {
-        flag = true;
-      }
-      flag = false;
-    }
-
-    Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
-
-    if (!flag) {
-      return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("You are in Vicinity!"),
-            content: Text(
-              "Proceed to Authentication to mark attendance",
-            ),
-            actions: <Widget>[
-              MaterialButton(
-                  elevation: 5.0,
-                  child: Text(
-                    "Authentication",
-                    style: TextStyle(color: kOrangeColor),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).popAndPushNamed('/attendance');
-                  })
-            ],
-            elevation: 24.0,
-            // backgroundColor: kOrangeColor,
-          );
-        },
-        barrierDismissible: false,
-      );
-    } else {
-      return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(
-              "You are not in Vicinity!",
-            ),
-            content: Text(
-              "Move closer to office location and try again",
-            ),
-            actions: <Widget>[
-              MaterialButton(
-                elevation: 5.0,
-                child: Text(
-                  "Exit",
-                  style: TextStyle(color: Colors.red[900]),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-            elevation: 24.0,
-            // backgroundColor: kOrangeColor,
-          );
-        },
-        barrierDismissible: false,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,9 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              Container(
-                margin: EdgeInsets.only(left: 20.0, right: 20.0),
-              ),
+              // Container(
+              //   margin: EdgeInsets.only(left: 20.0, right: 20.0),
+              // ),
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -155,11 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    // dialogs.showloadingdialog(context, _keyloader);
-                    // checkvicinity(context);
                     log('maps pressed');
                     Navigator.pushNamed(context, '/attendance');
-                    // getofficecoordinates();
                   },
                   child: HomeCard(
                     title: 'Mark Attendance',

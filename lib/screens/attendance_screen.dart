@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:app1/utilities/constants.dart';
@@ -11,19 +12,24 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+// import 'package:units/units.dart';
 
 class MarkAttendance extends StatefulWidget {
   @override
   _MarkAttendanceState createState() => _MarkAttendanceState();
 }
-//TODO: Get Office location
-//TODO: Get distance between
-//TODo: Mark attendance or prompt to move closer to location
 
 class _MarkAttendanceState extends State<MarkAttendance> {
   Position _currentPosition;
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
-  LatLng cameraFocus;
+  LatLng officeFocus;
+  LatLng curPosFocus;
+  List<Marker> markers = [];
+  GoogleMapController _googleMapController;
+  Future<PositionalData> getLoc;
+  Set<Circle> circleSet = {};
+  bool _isDisabled;
 
   Future<PositionalData> _getCurrentLocation() async {
     Position userLocation = await Geolocator().getCurrentPosition(
@@ -32,11 +38,7 @@ class _MarkAttendanceState extends State<MarkAttendance> {
     int empId = await getEmployeeID();
     String path = '/office_location/';
     http.Response response = await http.get(kUrl + path + empId.toString());
-    log(response.body.toString());
-    log('User location: ' +
-        userLocation.latitude.toString() +
-        " " +
-        userLocation.longitude.toString());
+
     var officeLoc = jsonDecode(response.body);
     double distanceInMeters = await Geolocator().distanceBetween(
         userLocation.latitude,
@@ -49,46 +51,81 @@ class _MarkAttendanceState extends State<MarkAttendance> {
         destLat: officeLoc["lat"],
         destLong: officeLoc["long"],
         distM: distanceInMeters);
-    cameraFocus = LatLng(positionalData.curLat, positionalData.curLong);
+    officeFocus = LatLng(positionalData.destLat, positionalData.destLong);
+    curPosFocus = LatLng(positionalData.curLat, positionalData.curLong);
+    if (positionalData.distM <= 10) {
+      _isDisabled = true;
+    } else {
+      _isDisabled = false;
+    }
+    markers.add(
+      Marker(
+        markerId: MarkerId('OfficeMarker'),
+        draggable: false,
+        position: officeFocus,
+      ),
+    );
+    Circle circle = Circle(
+      center: officeFocus,
+      radius: 50,
+      strokeWidth: 0,
+      // strokeColor: Colors.red,
+      fillColor: Color(0x220000FF),
+      circleId: CircleId("OfficeRadius"),
+    );
+    circleSet.add(circle);
     return positionalData;
   }
 
-  Map<MarkerId, Marker> markers =
-      <MarkerId, Marker>{}; // CLASS MEMBER, MAP OF MARKS
-  void _add(PositionalData data) {
-    var markerIdVal = '0';
-    final MarkerId markerId = MarkerId(markerIdVal);
-
-    // creating a new MARKER
-    final Marker marker = Marker(
-      markerId: markerId,
-      position: LatLng(data.destLat, data.curLong),
-      infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
-      // onTap: () {
-      //   _onMarkerTapped(markerId);
-      // },
+  _markAttendance() async {
+    int fid = await getOfficeID();
+    String path = '/attendance/$fid';
+    http.Response response = await http.post(
+      kUrl + path,
     );
-
-    setState(() {
-      // adding a new marker to map
-      markers[markerId] = marker;
-    });
+    if (response.statusCode == 200) {
+      AlertDialog alert = AlertDialog(
+        title: Text("Success"),
+        content: Text("Attendance Marked"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: Text('Ok'),
+          )
+        ],
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
+    } else {
+      AlertDialog alert = AlertDialog(
+        title: Text("Something went wrong"),
+        content: Text(
+            "Attendance not marked. Check your internet connection and try again."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Ok'),
+          )
+        ],
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
+    }
   }
 
-  bool flag = false;
-  void setCameraFocus(PositionalData data) {
-    setState(() {
-      if (flag == false) {
-        cameraFocus = LatLng(data.destLat, data.destLong);
-        flag = true;
-      } else {
-        cameraFocus = LatLng(data.curLat, data.curLong);
-        flag = false;
-      }
-    });
-  }
-
-  Future<PositionalData> getLoc;
   @override
   void initState() {
     getLoc = _getCurrentLocation();
@@ -101,8 +138,21 @@ class _MarkAttendanceState extends State<MarkAttendance> {
     SizeConfig().init(context);
 
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Mark Attendance",
+      appBar: AppBar(
+        title: Text('Mark Attendance'),
+        backgroundColor: kOrangeColor,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/attendance');
+            },
+          ),
+        ],
       ),
       drawer: MyDrawer(),
       body: FutureBuilder(
@@ -116,18 +166,30 @@ class _MarkAttendanceState extends State<MarkAttendance> {
                     flex: 1,
                     child: distInfoCard(snapshot),
                   ),
+                  Text(
+                    'Refresh to update location if button is disabled',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.redAccent,
+                      fontSize: SizeConfig.safeBlockHorizontal * 4,
+                    ),
+                  ),
                   Expanded(
                     flex: 7,
                     child: mapCard(snapshot),
                   ),
-                  Expanded(
-                    child: TextButton(
-                      child: Text('Go to office marker'),
-                      onPressed: () {
-                        setState(() {
-                          setCameraFocus(snapshot.data);
-                        });
-                      },
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ButtonTheme(
+                      buttonColor: kOrangeColor,
+                      minWidth: SizeConfig.screenWidth / 2,
+                      child: RaisedButton(
+                        child: Text(
+                          'Mark Attendance',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: _isDisabled ? null : _markAttendance,
+                      ),
                     ),
                   )
                 ],
@@ -145,22 +207,79 @@ class _MarkAttendanceState extends State<MarkAttendance> {
     return Container(
       child: Card(
         margin: EdgeInsets.all(8.0),
-        child: GoogleMap(
-          myLocationEnabled: true,
-          compassEnabled: true,
-          initialCameraPosition: CameraPosition(
-            zoom: 16,
-            bearing: 30,
-            target: cameraFocus,
+        child: Stack(children: [
+          GoogleMap(
+            myLocationEnabled: true,
+            compassEnabled: true,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: true,
+            initialCameraPosition: CameraPosition(
+              zoom: 16,
+              bearing: 30,
+              target: curPosFocus,
+            ),
+            onMapCreated: (controller) {
+              setState(() {
+                _googleMapController = controller;
+              });
+            },
+            markers: Set.from(markers),
+            // circles: circleSet,
           ),
-          markers: Set<Marker>.of(markers.values),
-          // circles: ,
-        ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Opacity(
+                opacity: 0.7,
+                child: FloatingActionButton.extended(
+                  onPressed: () {
+                    moveToMarker(snapshot.data.destLat, snapshot.data.destLong);
+                  },
+                  backgroundColor: Colors.white,
+                  icon: Icon(
+                    Icons.location_city,
+                    color: Colors.black,
+                  ),
+                  // elevation: 5.0,
+                  label: Text('Go to Office Pin',
+                      style: TextStyle(color: Colors.black)),
+                ),
+              ),
+            ),
+          ),
+        ]),
       ),
     );
   }
 
-  Card distInfoCard(snapshot) {
+  void mapCreated(controller) {
+    setState(() {
+      _currentPosition = controller;
+    });
+  }
+
+  void moveToMarker(latitude, longitude) {
+    _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(latitude, longitude),
+        zoom: 17,
+      ),
+    ));
+  }
+
+  Widget distInfoCard(snapshot) {
+    String dist;
+    if (snapshot.data.distM > 500) {
+      // dist = snapshot.data.distM.inKilometers.toString();
+      dist = double.parse((snapshot.data.distM / 1000).toString())
+              .toStringAsFixed(1) +
+          ' Km ';
+      double km = snapshot.data.distM / 1000;
+    } else {
+      dist = double.parse((snapshot.data.distM).toString()).toStringAsFixed(1) +
+          ' m ';
+    }
     return Card(
       margin: EdgeInsets.all(8.0),
       child: Padding(
@@ -174,7 +293,7 @@ class _MarkAttendanceState extends State<MarkAttendance> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: snapshot.data.distM.toString() + ' meters ',
+                text: dist,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               TextSpan(
