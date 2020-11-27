@@ -68,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Expanded(
+                child: Container(),
+              ),
+              Expanded(
                 child: GestureDetector(
                   onTap: () {
                     Navigator.pushNamed(context, '/maps_menu');

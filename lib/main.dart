@@ -1,6 +1,9 @@
 import 'package:app1/screens/attendance_screen.dart';
 import 'package:app1/screens/maps_menu_screen.dart';
+import 'package:app1/screens/navigate_to_office.dart';
+import 'package:app1/screens/new_home_screen.dart';
 import 'package:app1/screens/profile_screen.dart';
+import 'package:app1/screens/view_attendance.dart';
 import 'package:flutter/material.dart';
 
 // Importing Screens
@@ -24,17 +27,19 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      home: id == null ? LoginScreen() : HomeScreen(),
+      home: id == null ? LoginScreen() : HomeView(),
       routes: <String, WidgetBuilder>{
         // '/': (context) => checkLogin(),
         '/login': (context) => LoginScreen(),
-        '/home': (context) => HomeScreen(),
+        // '/home': (context) => HomeScreen(),
+        '/home': (context) => HomeView(),
         '/qr_scanner': (context) => QRScanner(),
         '/profile_screen': (context) => ProfileScreen(),
         // '/attendance': (context) => AttendanceScreen(),
         '/attendance': (context) => MarkAttendance(),
         // '/attendance': (context) => MapPage(),
-
+        '/view_attendance': (context) => ViewAttendance(),
+        '/navigate_to_office': (context) => NavigateOffice(),
         '/maps_menu': (context) => MapsMenuScreen(),
         '/vac_screen': (context) => VaccinationScreen(),
         '/change_password': (context) => UpdatePassword(),

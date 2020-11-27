@@ -38,6 +38,7 @@ class _MapsMenuScreenState extends State<MapsMenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -77,7 +78,7 @@ class _MapsMenuScreenState extends State<MapsMenuScreen> {
                         'Address',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 25.0,
+                          // fontSize: 25.0,
                           color: Colors.black87,
                         ),
                       ),
@@ -85,10 +86,10 @@ class _MapsMenuScreenState extends State<MapsMenuScreen> {
                     DataColumn(
                       label: Center(
                         child: Text(
-                          'Go To Map',
+                          'Navigate',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 25,
+                            // fontSize: 25,
                             color: Colors.black87,
                           ),
                         ),
@@ -103,7 +104,7 @@ class _MapsMenuScreenState extends State<MapsMenuScreen> {
                           cells: [
                             DataCell(
                               Container(
-                                width: 230,
+                                width: SizeConfig.safeBlockHorizontal * 60,
                                 child: Text(
                                   loc.location,
                                   softWrap: true,
@@ -113,16 +114,14 @@ class _MapsMenuScreenState extends State<MapsMenuScreen> {
                               ),
                             ),
                             DataCell(
-                              GestureDetector(
-                                onTap: () {
-                                  MapsLauncher.launchQuery(loc.location);
-                                },
-                                child: Center(
-                                  child: Icon(
-                                    Icons.map,
-                                    // color: kOrangeColor,
-                                    // size: 50,
-                                  ),
+                              Center(
+                                child: IconButton(
+                                  icon: Icon(Icons.map),
+                                  onPressed: () {
+                                    MapsLauncher.launchQuery(loc.location);
+                                  },
+                                  // color: kOrangeColor,
+                                  // size: 50,
                                 ),
                               ),
                             ),
