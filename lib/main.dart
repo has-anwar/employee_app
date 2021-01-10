@@ -19,6 +19,7 @@ import 'screens/vac_screen.dart';
 import 'screens/password_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/attendance_map_screen.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +36,12 @@ Future<void> main() async {
         '/home': (context) => HomeView(),
         '/qr_scanner': (context) => QRScanner(),
         '/profile_screen': (context) => ProfileScreen(),
-        // '/attendance': (context) => AttendanceScreen(),
-        '/attendance': (context) => MarkAttendance(),
+        '/attendance': (context) => AttendanceScreen(),
+        // '/attendance': (context) => MarkAttendance(),
+
         // '/attendance': (context) => MapPage(),
         '/view_attendance': (context) => ViewAttendance(),
-        '/navigate_to_office': (context) => NavigateOffice(),
+        // '/navigate_to_office': (context) => NavigateOffice(),
         '/maps_menu': (context) => MapsMenuScreen(),
         '/vac_screen': (context) => VaccinationScreen(),
         '/change_password': (context) => UpdatePassword(),

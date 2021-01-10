@@ -17,7 +17,7 @@ class _MyDrawerState extends State<MyDrawer> {
     var _name = await getName();
     var _email = await getEmail();
     UserInfo userInfo = UserInfo(name: _name, email: _email);
-
+    print(_email);
     setState(() {
       name = userInfo.name;
       email = userInfo.email;

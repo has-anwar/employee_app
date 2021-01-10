@@ -48,6 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
     var userInfo = jsonDecode(response.body);
+    print('userInfo');
+    print(userInfo);
     if (userInfo['flag'] == true) {
       setPrefs(userInfo);
       Navigator.popAndPushNamed(context, '/home');

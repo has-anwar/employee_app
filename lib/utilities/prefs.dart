@@ -78,7 +78,6 @@ setPrefs(userInfo) async {
   String email = userInfo['email'];
   int office_id = userInfo['office_id'];
   String number = userInfo['number'];
-
   setEmployeeID(id);
   setName(name);
   setCNIC(cnic);

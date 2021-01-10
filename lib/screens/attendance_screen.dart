@@ -9,6 +9,7 @@ import 'package:app1/resources/my_drawer.dart';
 import 'package:app1/utilities/prefs.dart';
 import 'package:app1/data/positional_data.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loc;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -30,6 +31,11 @@ class _MarkAttendanceState extends State<MarkAttendance> {
   Future<PositionalData> getLoc;
   Set<Circle> circleSet = {};
   bool _isDisabled;
+
+////////////////////////////////////////////
+  loc.LocationData currentLocation;
+  loc.Location location;
+  /////////////
 
   Future<PositionalData> _getCurrentLocation() async {
     Position userLocation = await Geolocator().getCurrentPosition(
@@ -130,6 +136,13 @@ class _MarkAttendanceState extends State<MarkAttendance> {
   void initState() {
     getLoc = _getCurrentLocation();
     super.initState();
+    location = new loc.Location();
+    location.changeSettings(interval: 1000);
+    location.onLocationChanged.listen((loc.LocationData cLoc) {
+      setState(() {
+        currentLocation = cLoc;
+      });
+    });
   }
 
   @override
@@ -293,7 +306,10 @@ class _MarkAttendanceState extends State<MarkAttendance> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: dist,
+                // text: dist,
+                text: currentLocation.latitude.toString() +
+                    "       " +
+                    currentLocation.longitude.toString(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               TextSpan(

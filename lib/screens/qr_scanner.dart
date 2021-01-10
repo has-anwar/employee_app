@@ -23,6 +23,39 @@ class _QRScannerState extends State<QRScanner> {
 
   QRViewController controller;
 
+  void rescan() {
+    controller.pauseCamera();
+    HapticFeedback.lightImpact();
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Incorrect QR Code Scanned'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Generate new QR Code from official app'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'Re-scan',
+                style: TextStyle(color: kOrangeColor),
+              ),
+              onPressed: () {
+                controller.resumeCamera();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,36 +117,7 @@ class _QRScannerState extends State<QRScanner> {
               Navigator.popAndPushNamed(context, '/vac_screen',
                   arguments: childData);
             } else {
-              controller.pauseCamera();
-              HapticFeedback.lightImpact();
-              showDialog<void>(
-                context: context,
-                barrierDismissible: false, // user must tap button!
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Incorrect QR Code Scanned'),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: <Widget>[
-                          Text('Generate new QR Code from official app'),
-                        ],
-                      ),
-                    ),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text(
-                          'Re-scan',
-                          style: TextStyle(color: kOrangeColor),
-                        ),
-                        onPressed: () {
-                          controller.resumeCamera();
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+              rescan();
             }
           },
         );
@@ -137,14 +141,14 @@ class _QRScannerState extends State<QRScanner> {
         },
         body: jsonEncode(<String, String>{"token": "$token"}));
     print(childResponse);
+    if (childResponse.statusCode == 400) {
+      rescan();
+    }
     var data1 = jsonDecode(childResponse.body);
     int childId = data1['parent_id'];
     path = '/parent_info/$childId';
     var parentResponse = await http.get(kUrl + path);
     var parentData = jsonDecode(parentResponse.body);
-    // TODO: Remove dis
-    // print(data1);
-    // print(parentData);
     ChildData childData = ChildData(
         data1['child_id'],
         data1['name'],
