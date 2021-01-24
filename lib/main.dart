@@ -4,6 +4,7 @@ import 'package:app1/screens/navigate_to_office.dart';
 import 'package:app1/screens/new_home_screen.dart';
 import 'package:app1/screens/profile_screen.dart';
 import 'package:app1/screens/view_attendance.dart';
+import 'package:app1/utilities/date_picker_dialog.dart';
 import 'package:flutter/material.dart';
 
 // Importing Screens
@@ -41,6 +42,8 @@ Future<void> main() async {
 
         // '/attendance': (context) => MapPage(),
         '/view_attendance': (context) => ViewAttendance(),
+        '/date_time': (context) => DateTimeDialog(),
+
         // '/navigate_to_office': (context) => NavigateOffice(),
         '/maps_menu': (context) => MapsMenuScreen(),
         '/vac_screen': (context) => VaccinationScreen(),

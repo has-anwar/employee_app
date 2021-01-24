@@ -60,10 +60,15 @@ class _MarkAttendanceState extends State<MarkAttendance> {
     officeFocus = LatLng(positionalData.destLat, positionalData.destLong);
     curPosFocus = LatLng(positionalData.curLat, positionalData.curLong);
     if (positionalData.distM <= 10) {
-      _isDisabled = true;
+      setState(() {
+        _isDisabled = false;
+      });
     } else {
-      _isDisabled = false;
+      setState(() {
+        _isDisabled = true;
+      });
     }
+    print(positionalData.distM);
     markers.add(
       Marker(
         markerId: MarkerId('OfficeMarker'),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/utilities/date_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:app1/data/child_data.dart';
 import 'package:app1/utilities/constants.dart';
@@ -15,7 +16,7 @@ class VaccinationScreen extends StatefulWidget {
 
 class _VaccinationScreenState extends State<VaccinationScreen> {
   List<bool> flags = [];
-  String vaccineName = '';
+  String vaccineName;
   List<Vaccine> vacs = [];
   double _fontSize = 20.0;
   Color textColor = Color(0xFFF212121);
@@ -41,12 +42,193 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
     return empID;
   }
 
+  bool _isValid = false;
+  isVaccineValid() {
+    if (vaccineName != null) {
+      setState(() {
+        _isValid = true;
+      });
+    } else {
+      setState(() {
+        _isValid = false;
+      });
+    }
+  }
+
+  void eSignRecord(ChildData args, String date) {
+    {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return WillPopScope(
+            onWillPop: () async => false,
+            child: AlertDialog(
+              title: Text("Confirm"),
+              content: Text(
+                "Are you sure you want to update vaccination record of ${args.childName} with $vaccineName?",
+              ),
+              actions: <Widget>[
+                Row(
+                  children: [
+                    MaterialButton(
+                      elevation: 5.0,
+                      child: Text(
+                        "Yes",
+                        style: TextStyle(color: kOrangeColor),
+                      ),
+                      onPressed: () async {
+                        String path = '/vaccine_records/${args.childId}';
+                        final http.Response response = await http.post(
+                          kUrl + path,
+                          headers: <String, String>{
+                            'Content-Type': 'application/json; charset=UTF-8',
+                          },
+                          body: jsonEncode(
+                            <String, String>{
+                              "vac_name": "$vaccineName",
+                              "child_id": "${args.childId}",
+                              "emp_id": "$empID",
+                              if (date != null) 'dor': "$date"
+                            },
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                        if (response.statusCode == 200) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return WillPopScope(
+                                onWillPop: () async => false,
+                                child: AlertDialog(
+                                  title: Text("Updated!"),
+                                  content: Text(
+                                    "Record has been successfully updated",
+                                  ),
+                                  actions: <Widget>[
+                                    MaterialButton(
+                                        elevation: 5.0,
+                                        child: Text(
+                                          "Go to Dashboard",
+                                          style: TextStyle(color: kOrangeColor),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context)
+                                              .popAndPushNamed('/home');
+                                        })
+                                  ],
+                                  elevation: 24.0,
+                                  // backgroundColor: kOrangeColor,
+                                ),
+                              );
+                            },
+                            barrierDismissible: false,
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return WillPopScope(
+                                onWillPop: () async => false,
+                                child: AlertDialog(
+                                  title: Text("Error"),
+                                  content: Text(
+                                    "Something went wrong",
+                                  ),
+                                  actions: <Widget>[
+                                    MaterialButton(
+                                        elevation: 5.0,
+                                        child: Text(
+                                          "Re-Try",
+                                          style: TextStyle(color: kOrangeColor),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        })
+                                  ],
+                                  elevation: 24.0,
+                                  // backgroundColor: kOrangeColor,
+                                ),
+                              );
+                            },
+                            barrierDismissible: false,
+                          );
+                        }
+                      },
+                    ),
+                    MaterialButton(
+                        elevation: 5.0,
+                        child: Text(
+                          "No",
+                          style: TextStyle(color: kOrangeColor),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        })
+                  ],
+                )
+              ],
+              elevation: 24.0,
+              // backgroundColor: kOrangeColor,
+            ),
+          );
+        },
+        barrierDismissible: false,
+      );
+    }
+    ;
+  }
+
+  Future<void> _showMyDialog(ChildData args) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            title: Text('Select Date for Re-administration'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  DateTimeDialog(
+                    dateCallback: dateCallback,
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Approve and Update'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  eSignRecord(args, date);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void dateCallback(_dateFromCallback) {
+    setState(() {
+      print('Date from callback>>>$_dateFromCallback');
+      date = _dateFromCallback;
+      print('Date>>>$date');
+    });
+  }
+
+  String date;
+
   int empID;
 
   Future<List<Vaccine>> _func;
 
   @override
   void initState() {
+    print(vaccineName);
     getEmpID();
     _func = getVaccines();
     super.initState();
@@ -96,6 +278,8 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
               );
             } else {
               return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Flexible(
                     flex: 2,
@@ -218,17 +402,31 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                                       value: flags[index],
                                       activeColor: kOrangeColor,
                                       onChanged: (bool value) {
-                                        setState(() {
-                                          flags[index] = value;
-                                          vaccineName = vacs[index].vacName;
-                                          for (int i = 0;
-                                              i < flags.length;
-                                              i++) {
-                                            if (i != index) {
+                                        if (!value) {
+                                          setState(() {
+                                            vaccineName = null;
+                                            _isValid = false;
+                                            for (int i = 0;
+                                                i < flags.length;
+                                                i++) {
                                               flags[i] = false;
                                             }
-                                          }
-                                        });
+                                          });
+                                        }
+                                        if (value) {
+                                          setState(() {
+                                            _isValid = true;
+                                            flags[index] = value;
+                                            vaccineName = vacs[index].vacName;
+                                            for (int i = 0;
+                                                i < flags.length;
+                                                i++) {
+                                              if (i != index) {
+                                                flags[i] = false;
+                                              }
+                                            }
+                                          });
+                                        }
                                       },
                                     )
                                   ],
@@ -240,139 +438,20 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 300.0, top: 10.0, bottom: 20.0),
-                    child: FloatingActionButton.extended(
-                      backgroundColor: kOrangeColor,
-                      icon: Icon(
-                        Icons.sync,
-                        // size: 40.0,
-                        color: Colors.white,
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 300.0, top: 10.0, bottom: 20.0),
+                      child: FloatingActionButton.extended(
+                        backgroundColor: _isValid ? kOrangeColor : Colors.grey,
+                        icon: Icon(
+                          Icons.assignment_outlined,
+                          // size: 40.0,
+                          color: Colors.white,
+                        ),
+                        label: Text('e-Sign'),
+                        onPressed: _isValid ? () => _showMyDialog(args) : null,
                       ),
-                      label: Text('Sync'),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text("Confirm"),
-                              content: Text(
-                                "Are you sure you want to update vaccination record of ${args.childName} with $vaccineName?",
-                              ),
-                              actions: <Widget>[
-                                Row(
-                                  children: [
-                                    MaterialButton(
-                                      elevation: 5.0,
-                                      child: Text(
-                                        "Yes",
-                                        style: TextStyle(color: kOrangeColor),
-                                      ),
-                                      onPressed: () async {
-                                        String path =
-                                            '/vaccine_records/${args.childId}';
-                                        final http.Response response =
-                                            await http.post(
-                                          kUrl + path,
-                                          headers: <String, String>{
-                                            'Content-Type':
-                                                'application/json; charset=UTF-8',
-                                          },
-                                          body: jsonEncode(
-                                            <String, String>{
-                                              "vac_name": "$vaccineName",
-                                              "child_id": "${args.childId}",
-                                              "emp_id": "$empID"
-                                            },
-                                          ),
-                                        );
-
-                                        if (response.statusCode == 200) {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text("Updated!"),
-                                                content: Text(
-                                                  "Record has been successfully updated",
-                                                ),
-                                                actions: <Widget>[
-                                                  MaterialButton(
-                                                      elevation: 5.0,
-                                                      child: Text(
-                                                        "Go to Dashboard",
-                                                        style: TextStyle(
-                                                            color:
-                                                                kOrangeColor),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        Navigator.of(context)
-                                                            .popAndPushNamed(
-                                                                '/home');
-                                                      })
-                                                ],
-                                                elevation: 24.0,
-                                                // backgroundColor: kOrangeColor,
-                                              );
-                                            },
-                                            barrierDismissible: false,
-                                          );
-                                        } else {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text("Error"),
-                                                content: Text(
-                                                  "Something went wrong",
-                                                ),
-                                                actions: <Widget>[
-                                                  MaterialButton(
-                                                      elevation: 5.0,
-                                                      child: Text(
-                                                        "Re-Try",
-                                                        style: TextStyle(
-                                                            color:
-                                                                kOrangeColor),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      })
-                                                ],
-                                                elevation: 24.0,
-                                                // backgroundColor: kOrangeColor,
-                                              );
-                                            },
-                                            barrierDismissible: false,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                    MaterialButton(
-                                        elevation: 5.0,
-                                        child: Text(
-                                          "No",
-                                          style: TextStyle(color: kOrangeColor),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        })
-                                  ],
-                                )
-                              ],
-                              elevation: 24.0,
-                              // backgroundColor: kOrangeColor,
-                            );
-                          },
-                          barrierDismissible: false,
-                        );
-                      },
                     ),
                   )
                 ],

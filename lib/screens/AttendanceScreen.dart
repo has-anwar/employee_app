@@ -72,19 +72,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   LocationData currentLocation;
   _trackLocation() {
-    location.changeSettings(interval: 1000);
+    location.changeSettings(interval: 100);
     location.onLocationChanged.listen((LocationData cLoc) async {
-      print(cLoc.latitude);
+      // print(cLoc.latitude);
       double dist = await _getDistanceFromOffice(cLoc);
-      setState(() {
-        currentLocation = cLoc;
-        _distInMeters = dist;
-        if (dist >= 10) {
-          _isDisabled = true;
-        } else {
-          _isDisabled = false;
-        }
-      });
+      if (mounted) {
+        setState(() {
+          currentLocation = cLoc;
+          _distInMeters = dist;
+          if (dist >= 10) {
+            _isDisabled = true;
+          } else {
+            _isDisabled = false;
+          }
+        });
+      }
     });
   }
 
@@ -247,34 +249,38 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               minWidth: SizeConfig.screenWidth / 2,
                               child: RaisedButton(
                                 child: Text(
-                                  'Mark Attendance',
+                                  _distInMeters > 10
+                                      ? 'Move closer to mark attendance'
+                                      : 'Mark Attendance',
                                   style: TextStyle(color: Colors.white),
                                 ),
-                                onPressed: () {
-                                  if (_distInMeters >= 10) {
-                                    _markAttendance();
-                                  } else {
-                                    AlertDialog alert = AlertDialog(
-                                      title: Text("Attention"),
-                                      content: Text(
-                                          "You should be at least 10 meters away from location to mark attendance"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text('Ok'),
-                                        )
-                                      ],
-                                    );
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return alert;
+                                onPressed: _distInMeters > 10
+                                    ? null
+                                    : () {
+                                        if (_distInMeters <= 10) {
+                                          _markAttendance();
+                                        } else {
+                                          AlertDialog alert = AlertDialog(
+                                            title: Text("Attention"),
+                                            content: Text(
+                                                "You should be at least 10 meters away from location to mark attendance"),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Ok'),
+                                              )
+                                            ],
+                                          );
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return alert;
+                                            },
+                                          );
+                                        }
                                       },
-                                    );
-                                  }
-                                },
                               ),
                             ),
                           ),
