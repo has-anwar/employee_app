@@ -41,7 +41,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void updateInfo() async {
+  Future<bool> updateInfo() async {
+    bool _isUpdated = false;
+
     var _id = await getEmployeeID();
     Map<String, String> map = {'phone': 'null', 'email': 'null'};
 
@@ -52,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       var response = await http.put(kUrl + path, body: map);
       var userEmail = jsonDecode(response.body);
       email = await userEmail['email'];
+      _isUpdated = true;
 
       setState(() {
         setEmail(userEmail['email']);
@@ -66,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       var response = await http.put(kUrl + path, body: map);
       var userPhone = jsonDecode(response.body);
       contactNumber = await userPhone['phone'];
-
+      _isUpdated = true;
       setState(() {
         setEmail(userPhone['phone']);
         numberController.clear();
@@ -74,6 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       print('New phone not entered');
     }
+    return _isUpdated;
   }
 
   @override
@@ -189,21 +193,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     height: height * 0.05,
                   ),
-                  ButtonTheme(
-                    minWidth: 200.0,
-                    height: 60.0,
-                    child: RaisedButton(
-                      padding: EdgeInsets.all(8.0),
-                      color: kOrangeColor,
-                      textColor: Colors.white,
-                      child: Text('Update Profile'),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0)),
-                      onPressed: () {
-                        updateInfo();
-                        // Navigator.pushNamed(context, '/update_profile');
-                      },
-                    ),
+                  Builder(
+                    builder: (context) {
+                      return ButtonTheme(
+                        minWidth: 200.0,
+                        height: 60.0,
+                        child: RaisedButton(
+                          padding: EdgeInsets.all(8.0),
+                          color: kOrangeColor,
+                          textColor: Colors.white,
+                          child: Text('Update Profile'),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0)),
+                          onPressed: () async {
+                            bool isUpdated = await updateInfo();
+                            if (isUpdated) {
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline_outlined,
+                                        color: Colors.yellow,
+                                      ),
+                                      SizedBox(
+                                        width: 8.0,
+                                      ),
+                                      Text('Credentials have been updated')
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else {
+                              Scaffold.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline_outlined,
+                                        color: Colors.yellow,
+                                      ),
+                                      SizedBox(
+                                        width: 8.0,
+                                      ),
+                                      Text('No credentials edited to update')
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                            // Navigator.pushNamed(context, '/update_profile');
+                          },
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(
                     height: height * 0.01,

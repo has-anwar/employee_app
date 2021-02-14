@@ -1,3 +1,4 @@
+import 'package:app1/screens/splash_screen.dart';
 import 'package:app1/utilities/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:app1/utilities/constants.dart';
@@ -52,12 +53,24 @@ class _LoginScreenState extends State<LoginScreen> {
     print(userInfo);
     if (userInfo['flag'] == true) {
       setPrefs(userInfo);
-      Navigator.popAndPushNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, SplashScreen.id);
     } else {
-      Scaffold.of(context).showSnackBar(usernameSnackBar);
-      setState(() {
-        displayErrorLogin();
-      });
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.error_outline_outlined,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text('Incorrect login credentials entered'),
+            ],
+          ),
+        ),
+      );
     }
   }
 
@@ -87,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 SizedBox(height: height * 0.2),
                 Center(
-                  child: Logo(),
+                  child: Hero(tag: 'tag1', child: Logo()),
                 ),
                 SizedBox(height: height * 0.1),
                 Row(
@@ -134,7 +147,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         print(flag);
                         login(context);
                       } else {
-                        print('fields cannot be left empty');
+                        Scaffold.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(
+                                  Icons.error_outline_outlined,
+                                  color: Colors.yellow,
+                                ),
+                                SizedBox(
+                                  width: 8.0,
+                                ),
+                                Text('Please enter login credentials'),
+                              ],
+                            ),
+                          ),
+                        );
                       }
                     },
                   ),

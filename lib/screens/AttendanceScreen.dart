@@ -358,7 +358,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     TextSpan(
                       text: dist,
                       style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.amber),
+                          fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     TextSpan(
                       text: ' away from the attendance mark point',

@@ -71,6 +71,17 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                 Row(
                   children: [
                     MaterialButton(
+                        splashColor: Colors.red[100],
+                        elevation: 5.0,
+                        child: Text(
+                          "No",
+                          style: TextStyle(color: Colors.red[900]),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    MaterialButton(
+                      splashColor: Colors.orange[100],
                       elevation: 5.0,
                       child: Text(
                         "Yes",
@@ -156,15 +167,6 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                         }
                       },
                     ),
-                    MaterialButton(
-                        elevation: 5.0,
-                        child: Text(
-                          "No",
-                          style: TextStyle(color: kOrangeColor),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        })
                   ],
                 )
               ],
@@ -198,8 +200,22 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
               ),
             ),
             actions: <Widget>[
-              TextButton(
-                child: Text('Approve and Update'),
+              FlatButton(
+                splashColor: Colors.red[100],
+                child: Text(
+                  'Dismiss',
+                  style: TextStyle(color: Colors.red[900]),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                splashColor: Colors.orange[100],
+                child: Text(
+                  'Approve and Update',
+                  style: TextStyle(color: kOrangeColor),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   eSignRecord(args, date);
@@ -342,24 +358,6 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: 25.0,
-                                top: 0.0,
-                                right: 25.0,
-                                bottom: 10.0),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Age: ${args.age}',
-                                  style: TextStyle(
-                                    fontSize: _fontSize,
-                                    color: textColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -379,7 +377,7 @@ class _VaccinationScreenState extends State<VaccinationScreen> {
                     ],
                   ),
                   Flexible(
-                    flex: 6,
+                    flex: 7,
                     fit: FlexFit.loose,
                     child: ScrollConfiguration(
                       behavior: ScrollBehavior(),

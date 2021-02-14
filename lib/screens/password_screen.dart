@@ -37,30 +37,6 @@ class _UpdatePasswordState extends State<UpdatePassword> {
 
   Color backgroundColor = kBackgroundColor;
 
-  void displayError() {
-    iconData = Icons.cancel;
-    backgroundColor = errorColor;
-  }
-
-  String errorMessage = 'Error Message';
-  void displayUpdated() {
-    iconData = Icons.check_circle;
-    backgroundColor = Colors.green[900];
-  }
-
-  void updatedSuccessfully() {
-    errorMessage = 'Password updated successfully';
-    displayUpdated();
-  }
-
-  void wrongCurrentPassword() {
-    errorMessage = 'Incorrect Current Password';
-  }
-
-  void incorrectNewAndConfirmPasswords() {
-    errorMessage = 'New and Confirm passwords do not match';
-  }
-
   void getFlags() {
     if (currentPasswordController.text.isEmpty) {
       currentFlag = false;
@@ -96,46 +72,107 @@ class _UpdatePasswordState extends State<UpdatePassword> {
     return response;
   }
 
-  void updatePassword() async {
+  void updatePassword(context) async {
     getFlags();
     if (currentFlag && newFlag && confirmFlag) {
       if (confirmPasswordController.text == newPasswordController.text) {
         var response = await confirmCurrentPassword();
         var userInfo = jsonDecode(response.body);
         if (userInfo['flag'] == true) {
-          setState(() {
-            updatedSuccessfully();
-          });
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.error_outline_outlined,
+                  color: Colors.yellow,
+                ),
+                SizedBox(
+                  width: 8.0,
+                ),
+                Text('Password updated successfully!')
+              ],
+            ),
+          ));
         } else {
-          setState(() {
-            wrongCurrentPassword();
-            displayError();
-          });
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  Icons.error_outline_outlined,
+                  color: Colors.yellow,
+                ),
+                SizedBox(
+                  width: 8.0,
+                ),
+                Text('Incorrect password entered')
+              ],
+            ),
+          ));
         }
       } else {
-        setState(() {
-          incorrectNewAndConfirmPasswords();
-          displayError();
-        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.error_outline_outlined,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text('Passwords do not match')
+            ],
+          ),
+        ));
       }
     } else {
       if (!currentFlag) {
-        setState(() {
-          isEmpty();
-          displayError();
-        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.error_outline_outlined,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text('Current password cannot be left empty')
+            ],
+          ),
+        ));
       }
       if (!newFlag) {
-        setState(() {
-          isEmpty();
-          displayError();
-        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.error_outline_outlined,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text('Please enter a new password')
+            ],
+          ),
+        ));
       }
       if (!confirmFlag) {
-        setState(() {
-          isEmpty();
-          displayError();
-        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.error_outline_outlined,
+                color: Colors.yellow,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text('Please confirm new password')
+            ],
+          ),
+        ));
       }
       setState(() {
         currentFlag = true;
@@ -152,10 +189,6 @@ class _UpdatePasswordState extends State<UpdatePassword> {
     setState(() {
       backgroundColor = kBackgroundColor;
     });
-  }
-
-  void isEmpty() {
-    errorMessage = 'Password fields cannot be left empty';
   }
 
   @override
@@ -178,21 +211,7 @@ class _UpdatePasswordState extends State<UpdatePassword> {
             child: Column(
               children: [
                 SizedBox(
-                  height: height * 0.1,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      iconData,
-                      color: backgroundColor,
-                    ),
-                    SizedBox(width: width * 0.04),
-                    Text(
-                      errorMessage,
-                      style: TextStyle(color: backgroundColor, fontSize: 20.0),
-                    ),
-                  ],
+                  height: height * 0.15,
                 ),
                 ProfileLabelText(label: 'Current Password'),
                 ReusableTextField(
@@ -230,22 +249,26 @@ class _UpdatePasswordState extends State<UpdatePassword> {
                 SizedBox(
                   height: height * 0.1,
                 ),
-                ButtonTheme(
-                  minWidth: 200.0,
-                  height: 60.0,
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(8.0),
-                    color: Colors.red[900],
-                    textColor: Colors.white,
-                    child: Text('Update Password'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    onPressed: () {
-                      updatePassword();
-                    },
-                  ),
-                )
+                Builder(
+                  builder: (context) {
+                    return ButtonTheme(
+                      minWidth: 200.0,
+                      height: 60.0,
+                      child: RaisedButton(
+                        padding: EdgeInsets.all(8.0),
+                        color: Colors.red[900],
+                        textColor: Colors.white,
+                        child: Text('Update Password'),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                        ),
+                        onPressed: () {
+                          updatePassword(context);
+                        },
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

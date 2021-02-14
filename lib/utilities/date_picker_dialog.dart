@@ -47,6 +47,14 @@ class _DateTimeDialogState extends State<DateTimeDialog> {
                     initialDate: DateTime.now(),
                     firstDate: DateTime(DateTime.now().year),
                     lastDate: DateTime(2225),
+                    builder: (context, child) {
+                      return Theme(
+                        data: ThemeData(
+                          primaryColor: kOrangeColor,
+                        ), // This will change to light theme.
+                        child: child,
+                      );
+                    },
                   ).then((date) {
                     setState(() {
                       _dateTime = date;

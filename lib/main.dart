@@ -3,7 +3,9 @@ import 'package:app1/screens/maps_menu_screen.dart';
 import 'package:app1/screens/navigate_to_office.dart';
 import 'package:app1/screens/new_home_screen.dart';
 import 'package:app1/screens/profile_screen.dart';
+import 'package:app1/screens/splash_screen.dart';
 import 'package:app1/screens/view_attendance.dart';
+import 'package:app1/utilities/constants.dart';
 import 'package:app1/utilities/date_picker_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -29,6 +31,7 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
+      theme: ThemeData(primaryColor: kOrangeColor, splashColor: kOrangeColor),
       home: id == null ? LoginScreen() : HomeView(),
       routes: <String, WidgetBuilder>{
         // '/': (context) => checkLogin(),
@@ -48,6 +51,7 @@ Future<void> main() async {
         '/maps_menu': (context) => MapsMenuScreen(),
         '/vac_screen': (context) => VaccinationScreen(),
         '/change_password': (context) => UpdatePassword(),
+        SplashScreen.id: (context) => SplashScreen(),
         // '/office_map': (context) => OfficeMap(),
       },
     ),

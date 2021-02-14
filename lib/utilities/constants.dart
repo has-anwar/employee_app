@@ -11,7 +11,7 @@ const kBottomContainerHeight = 60.0;
 const kLabelFontSize = 40.0;
 
 var url1 = 'http://10.0.2.2:5000/employee/1';
-var kUrl = 'http://192.168.1.3:5000';
+var kUrl = 'http://192.168.10.8:5000';
 var url3 = 'http://0.0.0.0:5000/employee/1';
 // var kUrl = 'http://192.168.100.52:5000';
 

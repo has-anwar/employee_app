@@ -34,6 +34,7 @@ class _ReusableProfileTextFieldState extends State<ReusableProfileTextField> {
             controller: widget.myController,
             decoration: InputDecoration(
               prefixIcon: widget.icon,
+              border: OutlineInputBorder(),
               hintText: widget.hint,
               hintStyle: TextStyle(
                 fontSize: 18.0,
